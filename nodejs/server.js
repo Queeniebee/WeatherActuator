@@ -1,8 +1,11 @@
-//a server for Weather Actuator
-
+/*Server for Weather Actuator
+* by Seiyable && Queeniebee
+*
+*/
 //================================================
 //require
 var express = require('express');
+var websocket = require('ws');
 var exphbs  = require('express3-handlebars');
 var app = express();
 var bodyParser = require('body-parser');
@@ -79,4 +82,4 @@ app.post('/', function(req, res){
 //server setup
 var server = app.listen(3000, function(){
   console.log('Listening on port %d', server.address().port);
-});
+}); 	
