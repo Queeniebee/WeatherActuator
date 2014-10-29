@@ -5,11 +5,15 @@
 //================================================
 //require
 var express = require('express');
-var websocket = require('ws');
+var serialPort = require('serialport');
+SerialPort  = serialport.SerialPort;
+var portName = process.argv[2];
+
 var exphbs  = require('express3-handlebars');
 var app = express();
 var bodyParser = require('body-parser');
 var request = require('request');
+
 
 //use static local files
 app.use(express.static(__dirname + '/public'));
@@ -71,15 +75,14 @@ app.post('/', function(req, res){
         res.render('layouts/top', data);
     }
   };
-
   //request to the API
   request.get(query, callback);
 });
-
-
 
 //============================================
 //server setup
 var server = app.listen(3000, function(){
   console.log('Listening on port %d', server.address().port);
-}); 	
+}); 
+
+var arduino = new SerialPort(portName, {baudRate: 9600, parser: serialport.parsers.readline("\r\n")});
