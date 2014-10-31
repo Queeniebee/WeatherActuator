@@ -6,7 +6,7 @@
 
 //THIS SCRIPT FAILS WITH STRICT
 //NEED TO REFACTOR
-// "use strict";
+"use strict";
 
 //require
 var express = require('express');
@@ -20,6 +20,11 @@ var SerialPort = require("serialport");
 var SerialPort = require("serialport").SerialPort;
 
 var app = express();
+var port = "/dev/tty.usbmodemfd121";
+var active = false;
+var target = port.split("/");
+var fileLogger =  target = target[target.length-1]+".log";
+var cityname = "";
 
 var serialPort = new SerialPort("/dev/tty.usbmodemfd121", {
         baudrate: 9600,
@@ -28,6 +33,7 @@ var serialPort = new SerialPort("/dev/tty.usbmodemfd121", {
          parity: 'none',
          stopBits: 1,
 		 encoding: 'utf8',
+		 buffersize:255*8,
          flowControl: false
 });
 
@@ -62,6 +68,7 @@ app.post('/', function(req, res){
   
   //initialize variables for the access to Open Weather API
   var query = "http://api.openweathermap.org/data/2.5/weather?";
+  var key = "";
   var options = [];
   options["APPID"] = "d9a5fc0bed270bb5e6e3c6ae3d0b2fe7";
   options["q"] = cityname;
@@ -83,15 +90,16 @@ app.post('/', function(req, res){
         console.log("Response from API:");
         //console.log(data);
 		
-        //convert the temperature from Kelvin to Celcius
-        data.main.temp = data.main.temp - 273.15;
+        //convert the temperature from Kelvin to Celsius
+        data.main.temp = data.main.temp - 273;
         data.main.temp = data.main.temp.toFixed(1);
         console.log(data.main.temp);
 
-		//Printing to serial port 
-		//need to convert to an int!
+		//Printing to serial port in ASCII
 		var dataToSend = parseInt(data.main.temp);
 		serialPort.write(dataToSend);
+
+// 		})
 
         //render a html with the response
         res.render('layouts/top', data);
