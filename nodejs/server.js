@@ -3,17 +3,77 @@
 *
 */
 //================================================
+"use strict";
+
 //require
 var express = require('express');
-var serialPort = require('serialport');
-SerialPort  = serialport.SerialPort;
-var portName = process.argv[2];
-
 var exphbs  = require('express3-handlebars');
-var app = express();
+var fs = require('fs');
+
 var bodyParser = require('body-parser');
 var request = require('request');
 
+var SerialPort = require("serialport");
+var SerialPort = require("serialport").SerialPort;
+
+var app = express();
+var port = "/dev/tty.usbmodemfd121";
+var baudrate = 9600;
+var active = false;
+
+var serialPort = new SerialPort(port, {
+	baudrate: baudrate
+});
+
+function attemptLogging(fd, port, baudrate){
+if (!active) {
+			fs.stat(port,  function (err, stats) {
+			  if (!err) {
+				active = true;
+		
+				fs.write(fd, "\n----\nOpening SerialPort: "+target+" at "+Date.now()+"\n----\n");  
+				serialPort.on("data", function (data) {
+				  fs.write(fd, data.toString());
+				});
+				serialPort.on("close", function (data) {
+				  active = false;
+				  fs.write(fd, "\n----\nClosing SerialPort: "+target+" at "+Date.now()+"\n----\n");  
+				});
+			  }
+			});
+		  }
+		}
+
+		if (!port) {
+		  console.log("You must specify a serial port location.");
+		} else {
+		  var target = port.split("/");
+		  target = target[target.length-1]+".log";
+		  if (!baudrate) {
+			baudrate = 9600;
+		  }
+		  fs.open("./"+target, 'w', function (err, fd) {
+			setInterval(function () {
+			  if (!active) {
+				try {
+				  attemptLogging(fd, port, baudrate);  
+				} catch (e) {
+				  // Error means port is not available for listening.
+				  active = false;
+				}
+			  }
+			}, 1000);
+		  });
+}
+/*
+var serialPort = new SerialPort("/dev/tty.usbmodemfd121", {
+        baudrate: 9600,
+        // defaults for Arduino serial communication
+         dataBits: 8,
+         parity: 'none',
+         stopBits: 1,
+         flowControl: false
+}); */
 
 //use static local files
 app.use(express.static(__dirname + '/public'));
@@ -57,19 +117,66 @@ app.post('/', function(req, res){
   }
   //remove the last charactor '&' from the query
   query = query.slice(0, -1);
-  console.log("Query: " + query);
+  //console.log("Query: " + query);
 
   //a callback function that will be called after the access to the API
   var callback = function(error, response, body) {
     if (!error && response.statusCode === 200) {
         var data = JSON.parse(body);
         console.log("Response from API:");
-        console.log(data);
-
+        //console.log(data);
+		
         //convert the temperature from Kelvin to Celcius
         data.main.temp = data.main.temp - 273.15;
         data.main.temp = data.main.temp.toFixed(1);
         console.log(data.main.temp);
+
+		//Printing to serial port 
+		/*function attemptLogging(fd, port, baudrate) {
+		  if (!active) {
+			fs.stat(port,  function (err, stats) {
+			  if (!err) {
+				active = true;
+		
+				fs.write(fd, "\n----\nOpening SerialPort: "+target+" at "+Date.now()+"\n----\n");  
+				serialPort.on("data", function (data) {
+				  fs.write(fd, data.toString());
+				});
+				serialPort.on("close", function (data) {
+				  active = false;
+				  fs.write(fd, "\n----\nClosing SerialPort: "+target+" at "+Date.now()+"\n----\n");  
+				});
+			  }
+			});
+		  }
+		}
+
+		if (!port) {
+		  console.log("You must specify a serial port location.");
+		} else {
+		  var target = port.split("/");
+		  target = target[target.length-1]+".log";
+		  if (!baudrate) {
+			baudrate = 9600;
+		  }
+		  fs.open("./"+target, 'w', function (err, fd) {
+			setInterval(function () {
+			  if (!active) {
+				try {
+				  attemptLogging(fd, port, baudrate);  
+				} catch (e) {
+				  // Error means port is not available for listening.
+				  active = false;
+				}
+			  }
+			}, 1000);
+		  });
+		} */
+
+
+		//need to convert to an int!
+		var dataToSend = parseInt(data.main.temp);
+		serialPort.write(dataToSend);
 
         //render a html with the response
         res.render('layouts/top', data);
@@ -84,5 +191,3 @@ app.post('/', function(req, res){
 var server = app.listen(3000, function(){
   console.log('Listening on port %d', server.address().port);
 }); 
-
-var arduino = new SerialPort(portName, {baudRate: 9600, parser: serialport.parsers.readline("\r\n")});
