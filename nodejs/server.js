@@ -13,64 +13,22 @@ var fs = require('fs');
 
 var bodyParser = require('body-parser');
 var request = require('request');
-var port = "/dev/tty.usbmodemfd121";
-
-//TESTING for Firmata
-var ledPin = 13;
 var firmata = require('firmata');
-var board = new firmata.Board(port, function(err) {
+var ledPin = 13;
+var port = "/dev/tty.usbmodemfd121";
+var board = new firmata.Board(port, function(err){
     if (err) {
         console.log(err);
         return;
     }
     console.log('connected');
-
-    console.log('Firmware: ' + board.firmware.name + '-' + board.firmware.version.major + '.' + board.firmware.version.minor);
-
-    var ledOn = true;
-    board.pinMode(ledPin, board.MODES.OUTPUT);
-
-    setInterval(function(){
-
-	if (ledOn) {
-        console.log('+');
-        board.digitalWrite(ledPin, board.HIGH);
-	}
-	else {
-        console.log('-');
-        board.digitalWrite(ledPin, board.LOW);
-	}
-
-	ledOn = !ledOn;
-
-    },500);
+	board.pinMode(ledPin, board.MODES.OUTPUT);
 
 });
-
-/*
-var SerialPort = require("serialport");
-var SerialPort = require("serialport").SerialPort;
-*/
 
 var app = express();
-
-var active = false;
-var target = port.split("/");
-var fileLogger =  target = target[target.length-1]+".log";
 var cityname = "";
-
-/*
-var serialPort = new SerialPort("/dev/tty.usbmodemfd121", {
-        baudrate: 9600,
-        // defaults for Arduino serial communication
-         dataBits: 8,
-         parity: 'none',
-         stopBits: 1,
-		 encoding: 'utf8',
-		 buffersize:255*8,
-         flowControl: false
-});
-*/
+var tempValue = 0;
 
 //use static local files
 app.use(express.static(__dirname + '/public'));
@@ -130,12 +88,26 @@ app.post('/', function(req, res){
         data.main.temp = data.main.temp.toFixed(1);
         console.log(data.main.temp);
 
-		/*
-		//Printing to serial port in ASCII
-		var dataToSend = parseInt(data.main.temp);
-		serialPort.write(dataToSend);
-        */
+		tempValue = data.main.temp;
 
+		if(tempValue >= 10){
+
+			board.digitalWrite(ledPin, board.HIGH);
+
+		} else{
+		board.digitalWrite(ledPin, board.LOW);
+
+		}
+		/*function dataToWrite(value){
+	var tempValue = value;
+		if(tempValue >= 10){
+			arduino.digitalWrite(ledPin, board.HIGH);
+		} else {
+			arduino.digitalWrite(ledPin, board.LOW);
+			}
+	}*/
+
+		
 // 		})
 
         //render a html with the response
