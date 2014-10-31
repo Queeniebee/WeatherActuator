@@ -4,8 +4,6 @@
 * 
 */
 
-//THIS SCRIPT FAILS WITH STRICT
-//NEED TO REFACTOR
 "use strict";
 
 //require
@@ -15,17 +13,53 @@ var fs = require('fs');
 
 var bodyParser = require('body-parser');
 var request = require('request');
+var port = "/dev/tty.usbmodemfd121";
 
+//TESTING for Firmata
+var ledPin = 13;
+var firmata = require('firmata');
+var board = new firmata.Board(port, function(err) {
+    if (err) {
+        console.log(err);
+        return;
+    }
+    console.log('connected');
+
+    console.log('Firmware: ' + board.firmware.name + '-' + board.firmware.version.major + '.' + board.firmware.version.minor);
+
+    var ledOn = true;
+    board.pinMode(ledPin, board.MODES.OUTPUT);
+
+    setInterval(function(){
+
+	if (ledOn) {
+        console.log('+');
+        board.digitalWrite(ledPin, board.HIGH);
+	}
+	else {
+        console.log('-');
+        board.digitalWrite(ledPin, board.LOW);
+	}
+
+	ledOn = !ledOn;
+
+    },500);
+
+});
+
+/*
 var SerialPort = require("serialport");
 var SerialPort = require("serialport").SerialPort;
+*/
 
 var app = express();
-var port = "/dev/tty.usbmodemfd121";
+
 var active = false;
 var target = port.split("/");
 var fileLogger =  target = target[target.length-1]+".log";
 var cityname = "";
 
+/*
 var serialPort = new SerialPort("/dev/tty.usbmodemfd121", {
         baudrate: 9600,
         // defaults for Arduino serial communication
@@ -36,6 +70,7 @@ var serialPort = new SerialPort("/dev/tty.usbmodemfd121", {
 		 buffersize:255*8,
          flowControl: false
 });
+*/
 
 //use static local files
 app.use(express.static(__dirname + '/public'));
@@ -95,9 +130,11 @@ app.post('/', function(req, res){
         data.main.temp = data.main.temp.toFixed(1);
         console.log(data.main.temp);
 
+		/*
 		//Printing to serial port in ASCII
 		var dataToSend = parseInt(data.main.temp);
 		serialPort.write(dataToSend);
+        */
 
 // 		})
 
