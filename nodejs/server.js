@@ -1,7 +1,7 @@
 /*Server for Weather Actuator
 * by Seiyable && Queeniebee
 *
-* 
+* RESTful version
 */
 
 "use strict";
@@ -38,14 +38,76 @@ app.set('view engine', 'handlebars');
 //body parser
 app.use(bodyParser());
 
+//server setup
+var server = app.listen(3000, function(){
+  console.log('Listening on port %d', server.address().port);
+});
 /***********************************
 A routing function that
 1)receives a GET request, and
 2)returns a html to web client
 ***********************************/
-app.get('/', function(req, res){
-  res.render('layouts/top');
-});
+// app.get('/', function(req, res){
+//   response.render('layouts/top');
+// });
+
+/*  API - RESTful Stuff */
+
+function sendIndexPage(req, res){
+	response.render('layouts/top');
+}
+
+function getCity(req, res){
+	cityname = req.params[1];
+	var query = "http://api.openweathermap.org/data/2.5/weather?";
+  	var key = "";
+  	var options = [];
+  	options["APPID"] = "d9a5fc0bed270bb5e6e3c6ae3d0b2fe7";
+  	options["q"] = cityname;
+
+	for (key in options){
+		var str = key + '=' + options[key];
+		query = query + str + '&';
+	}
+	  //remove the last character '&' from the query
+	  query = query.slice(0, -1);
+
+}
+
+function getCityTemp(error, response, body) {
+    if (!error && response.statusCode === 200) {
+        var data = JSON.parse(body);
+        console.log("Response from API:");
+        //console.log(data);
+		
+        //convert the temperature from Kelvin to Celsius
+        data.main.temp = data.main.temp - 273.15;
+        data.main.temp = data.main.temp.toFixed(1);
+        console.log(data.main.temp);
+
+		tempValue = data.main.temp;
+
+		if(tempValue >= 10){
+
+			board.digitalWrite(ledPin, board.HIGH);
+
+		} else{
+		board.digitalWrite(ledPin, board.LOW);
+
+		}
+  request.get(query, callback);
+
+}
+
+app.get('/', sendIndexPage);
+//this GETs the city and sets it on the physical device
+  //need to figure out if this app.get can accept a string with an array variable
+app.get('cityname/NewYork/', getCity);
+app.get('cityname/London/', getCity);
+app.get('cityname/Toyko/', getCity);
+
+//this GETs the actual temp from the OpenWeather API
+app.get('/ask', getCityTemp);
 
 /***********************************
 A routing function that
@@ -54,7 +116,7 @@ A routing function that
 2)returns a html to web client
 ***********************************/
 
-
+/*
 app.post('/', function(req, res){
   //assign the received city name to a new variable
 	cityname = req.body.cityname;
@@ -84,7 +146,7 @@ app.post('/', function(req, res){
         //console.log(data);
 		
         //convert the temperature from Kelvin to Celsius
-        data.main.temp = data.main.temp - 273;
+        data.main.temp = data.main.temp - 273.15;
         data.main.temp = data.main.temp.toFixed(1);
         console.log(data.main.temp);
 
@@ -98,16 +160,7 @@ app.post('/', function(req, res){
 		board.digitalWrite(ledPin, board.LOW);
 
 		}
-		/*function dataToWrite(value){
-	var tempValue = value;
-		if(tempValue >= 10){
-			arduino.digitalWrite(ledPin, board.HIGH);
-		} else {
-			arduino.digitalWrite(ledPin, board.LOW);
-			}
-	}*/
-
-		
+	
 // 		})
 
         //render a html with the response
@@ -117,8 +170,4 @@ app.post('/', function(req, res){
   //request to the API
   request.get(query, callback);
 });
-
-//server setup
-var server = app.listen(3000, function(){
-  console.log('Listening on port %d', server.address().port);
-}); 
+*/
