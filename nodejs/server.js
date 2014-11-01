@@ -9,8 +9,6 @@
 //require
 var express = require('express');
 var exphbs  = require('express3-handlebars');
-var fs = require('fs');
-
 var bodyParser = require('body-parser');
 var request = require('request');
 var firmata = require('firmata');
@@ -42,19 +40,9 @@ app.use(bodyParser());
 var server = app.listen(3000, function(){
   console.log('Listening on port %d', server.address().port);
 });
-/***********************************
-A routing function that
-1)receives a GET request, and
-2)returns a html to web client
-***********************************/
-// app.get('/', function(req, res){
-//   response.render('layouts/top');
-// });
-
-/*  API - RESTful Stuff */
 
 function sendIndexPage(req, res){
-	response.render('layouts/top');
+	res.render('layouts/top');
 }
 
 function getCity(req, res){
@@ -73,10 +61,10 @@ function getCity(req, res){
 	  query = query.slice(0, -1);
 
 }
+function getCityTemp(err, req, res, next){
 
-function getCityTemp(error, response, body) {
-    if (!error && response.statusCode === 200) {
-        var data = JSON.parse(body);
+    if (!err && response.statusCode === 200) {
+        var data = JSON.parse(res);
         console.log("Response from API:");
         //console.log(data);
 		
@@ -95,8 +83,8 @@ function getCityTemp(error, response, body) {
 		board.digitalWrite(ledPin, board.LOW);
 
 		}
-  request.get(query, callback);
-
+  request.get(query, getCityTemp);
+}
 }
 
 app.get('/', sendIndexPage);
@@ -108,66 +96,3 @@ app.get('cityname/Toyko/', getCity);
 
 //this GETs the actual temp from the OpenWeather API
 app.get('/ask', getCityTemp);
-
-/***********************************
-A routing function that
-1)receives a POST request with a city name,
-2)accesses to Open Weather API, and
-2)returns a html to web client
-***********************************/
-
-/*
-app.post('/', function(req, res){
-  //assign the received city name to a new variable
-	cityname = req.body.cityname;
-  
-  //initialize variables for the access to Open Weather API
-  var query = "http://api.openweathermap.org/data/2.5/weather?";
-  var key = "";
-  var options = [];
-  options["APPID"] = "d9a5fc0bed270bb5e6e3c6ae3d0b2fe7";
-  options["q"] = cityname;
-
-  //make a query string with these variables
-  for (key in options){
-    var str = key + '=' + options[key];
-    query = query + str + '&';
-  }
-
-  //remove the last character '&' from the query
-  query = query.slice(0, -1);
-  //console.log("Query: " + query);
-
-  //a callback function that will be called after the access to the API
-  var callback = function(error, response, body) {
-    if (!error && response.statusCode === 200) {
-        var data = JSON.parse(body);
-        console.log("Response from API:");
-        //console.log(data);
-		
-        //convert the temperature from Kelvin to Celsius
-        data.main.temp = data.main.temp - 273.15;
-        data.main.temp = data.main.temp.toFixed(1);
-        console.log(data.main.temp);
-
-		tempValue = data.main.temp;
-
-		if(tempValue >= 10){
-
-			board.digitalWrite(ledPin, board.HIGH);
-
-		} else{
-		board.digitalWrite(ledPin, board.LOW);
-
-		}
-	
-// 		})
-
-        //render a html with the response
-        res.render('layouts/top', data);
-    }
-  };
-  //request to the API
-  request.get(query, callback);
-});
-*/
