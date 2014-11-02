@@ -5,15 +5,14 @@
 */
 
 "use strict";
-
-//require
 var express = require('express');
 var exphbs  = require('express3-handlebars');
 var bodyParser = require('body-parser');
-// var request = require('request');
 var firmata = require('firmata');
 
 var ledPin = 13;
+var tempValue = 0;
+var cityname = "";
 var location = "";
 var port = "/dev/tty.usbmodemfd121";
 var board = new firmata.Board(port, function(err){
@@ -25,16 +24,14 @@ var board = new firmata.Board(port, function(err){
 	board.pinMode(ledPin, board.MODES.OUTPUT);
 
 });
-
 var app = express();
-var cityname = "";
-var tempValue = 0;
 
 //use static local files
 app.use(express.static(__dirname + '/public'));
 //handlebars
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
+
 //body parser
 app.use(bodyParser());
 
@@ -43,11 +40,24 @@ var server = app.listen(3000, function(){
   console.log('Listening on port %d', server.address().port);
 });
 
+//serve up index page from views/layouts
+//WORKS
 function sendIndexPage(req, res){
 	res.render('layouts/top');
 }
 
+//function that sets the city for the Actuator
+//FAILS
 function getCity(req, res){
+
+	res.write(/*where I write "<cityName> is set"*/);
+}
+//function that gets the temp of the specified city
+//FAILS
+function getCityTemp(err, req, res, next){
+
+//     if (!err && res.statusCode === 200) {
+    if (!err) {
 	cityname = req.params[1];
 	var query = "http://api.openweathermap.org/data/2.5/weather?";
   	var key = "";
@@ -61,12 +71,6 @@ function getCity(req, res){
 	}
 	  //remove the last character '&' from the query
 	  query = query.slice(0, -1);
-
-}
-function getCityTemp(err, req, res, next){
-
-//     if (!err && res.statusCode === 200) {
-    if (!err) {
         var data = JSON.parse(res);
         console.log("Response from API:");
         //console.log(data);
@@ -93,9 +97,9 @@ function getCityTemp(err, req, res, next){
 app.get('/', sendIndexPage);
 //this GETs the city and sets it on the physical device
   //need to figure out if this app.get can accept a string with an array variable
-app.get('cityname/NewYork/', getCity);
-app.get('cityname/London/', getCity);
-app.get('cityname/Toyko/', getCity);
+app.post('cityname/NewYork/', getCity);
+app.post('cityname/London/', getCity);
+app.post('cityname/Toyko/', getCity);
 
 //this GETs the actual temp from the OpenWeather API
 app.get('/ask', getCityTemp);
