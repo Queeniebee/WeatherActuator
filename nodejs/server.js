@@ -10,9 +10,11 @@
 var express = require('express');
 var exphbs  = require('express3-handlebars');
 var bodyParser = require('body-parser');
-var request = require('request');
+// var request = require('request');
 var firmata = require('firmata');
+
 var ledPin = 13;
+var location = "";
 var port = "/dev/tty.usbmodemfd121";
 var board = new firmata.Board(port, function(err){
     if (err) {
@@ -63,7 +65,8 @@ function getCity(req, res){
 }
 function getCityTemp(err, req, res, next){
 
-    if (!err && res.statusCode === 200) {
+//     if (!err && res.statusCode === 200) {
+    if (!err) {
         var data = JSON.parse(res);
         console.log("Response from API:");
         //console.log(data);
@@ -83,7 +86,7 @@ function getCityTemp(err, req, res, next){
 		board.digitalWrite(ledPin, board.LOW);
 
 		}
-  request.get(query, getCityTemp);
+//   request.get(query, getCityTemp);
 }
 }
 
