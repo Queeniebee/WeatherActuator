@@ -63,7 +63,7 @@ function getCity(req, res){
 }
 function getCityTemp(err, req, res, next){
 
-    if (!err && response.statusCode === 200) {
+    if (!err && res.statusCode === 200) {
         var data = JSON.parse(res);
         console.log("Response from API:");
         //console.log(data);
