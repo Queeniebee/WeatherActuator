@@ -47,10 +47,10 @@ function sendIndexPage(req, res){
 }
 
 //function that sets the city for the Actuator
-//FAILS
+//ALMOST WORKS
 function getCity(req, res){
-
-	res.write(/*where I write "<cityName> is set"*/);
+	
+	res.render('layouts/city');
 }
 //function that gets the temp of the specified city
 //FAILS
@@ -97,10 +97,8 @@ function getCityTemp(err, req, res, next){
 
 app.get('/', sendIndexPage);
 //this GETs the city and sets it on the physical device
-  //need to figure out if this app.get can accept a string with an array variable
-app.post('cityname/NewYork/', getCity);
-app.post('cityname/London/', getCity);
-app.post('cityname/Toyko/', getCity);
+app.get('/cityname/:cityname/', getCity);
+
 
 //this GETs the actual temp from the OpenWeather API
 app.get('/ask', getCityTemp);
