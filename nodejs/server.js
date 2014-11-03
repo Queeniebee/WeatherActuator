@@ -9,7 +9,7 @@ var express = require('express');
 var exphbs  = require('express3-handlebars');
 var bodyParser = require('body-parser');
 var firmata = require('firmata');
-
+var serialPort = require('serialport');
 var ledPin = 13;
 var tempValue = 0;
 var cityname = "";
@@ -54,7 +54,7 @@ function getCity(req, res){
 }
 //function that gets the temp of the specified city
 //FAILS
-function getCityTemp(err, req, res, next){
+function getCityTemp(err, req, res){
 
 //     if (!err && res.statusCode === 200) {
     if (!err) {
