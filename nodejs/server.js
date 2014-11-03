@@ -90,6 +90,7 @@ function getCityTemp(err, req, res, next){
 		board.digitalWrite(ledPin, board.LOW);
 
 		}
+	res.render('layouts/city');
 //   request.get(query, getCityTemp);
 }
 }
