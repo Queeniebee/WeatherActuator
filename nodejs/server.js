@@ -17,7 +17,6 @@ var ledPin = 13;
 var tempValue = 0;
 
 var location = "";
-var query = "http://api.openweathermap.org/data/2.5/weather?";
 
 var port = "/dev/tty.usbmodemfd121";
 var board = new firmata.Board(port, function(err){
@@ -54,28 +53,28 @@ function sendIndexPage(req, res){
 function getCity(req, res, body){
 	var actuatorName = req.param('name');
 	var cityName = req.param('cityname');
+	var query = "http://api.openweathermap.org/data/2.5/weather?";
+  	var key = "";
+  	var options = [];
+  	options["APPID"] = "d9a5fc0bed270bb5e6e3c6ae3d0b2fe7";
+  	options["q"] = cityName; //cityName from above
+
+	for (key in options){
+		var str = key + '=' + options[key];
+		query = query + str + '&';
+	}
+	  //remove the last character '&' from the query
+	query = query.slice(0, -1);
 	//checking if variable is being set
 	console.log(cityName);
 	console.log(actuatorName);
 	
-	getCityTemp(cityName);
+// 	var callback = getCityTemp();
 
+		console.log("Query: " + query);
 	//function that gets the temp of the specified city
-	function getCityTemp(error, response, body, cityName){
-// 			var query = "http://api.openweathermap.org/data/2.5/weather?";
-  			var key = "";
-  			var options = [];
-  			options["APPID"] = "d9a5fc0bed270bb5e6e3c6ae3d0b2fe7";
-  			options["q"] = cityName; //cityName from above
-
-			for (key in options){
-				var str = key + '=' + options[key];
-				query = query + str + '&';
-			}
-	  		//remove the last character '&' from the query
-	  		query = query.slice(0, -1);
-			if(!error && response.statusCode===200){
-
+		var callback = function getCityTemp(error, response, body){
+			if(!error && response.statusCode == 200){
          	var data = JSON.parse(body);
 
         	console.log("Response from API:");
@@ -87,7 +86,8 @@ function getCity(req, res, body){
         	console.log(data.main.temp);
 
 			tempValue = data.main.temp;
-
+			console.log(tempValue);
+/*
 			if(tempValue >= 10){
 
 				board.digitalWrite(ledPin, board.HIGH);
@@ -96,12 +96,12 @@ function getCity(req, res, body){
 			board.digitalWrite(ledPin, board.LOW);
 
 			}
-
+*/
 		res.render('layouts/city', data);
 		}
 	}
 
-		request.get(query, getCityTemp(cityName));
+		request.get(query, callback);
 // 		res.status(200).send(query);
 } 
 app.set('name', 'Weather Actuator');
