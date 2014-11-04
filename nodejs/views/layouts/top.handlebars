@@ -3,11 +3,7 @@
     <!-- spacing row -->
   </div>
   <div class="row" style="height: 30%; text-align: center;">
-<!-- 
-    <h1>{{name}}</h1>
-    <p>({{coord.lon}}, {{coord.lat}})</p>
-    <h4>{{main.temp}}℃</h4>
- -->
+
   </div>
   <div class="row" style="height: 10%;">
     <div class="col-md-4">
@@ -29,15 +25,19 @@
     </div>
     <div class="col-md-4" style="text-align: center;">
       <h3>Name your actuator</h3>
+
+      <form id="Acutator" method="post" action="/">
+ 
 <!-- 
-      <form method="post" action="/actuatorName/">
+      <form id="Actuator">
  -->
-      <form>
-		<input type="text" name="Actuator">
+		<input type="text">
         <p style="padding-top: 8px;"><button type="submit">Set</button></p>
       </form>
     </div>
-
+	{{#if Acutator}}
+	<h3>Actuator name <strong>{{Actuator}}</strong> is set!</h3>
+	{{/if}}
   </div>
   <div class="row" style="height: 40%;">
     <!-- spacing row -->
