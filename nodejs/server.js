@@ -60,8 +60,8 @@ function setDeviceName(req, res){
 //function that sets the city for the Actuator
 //WORKS
 function getCity(req, res, body){
-	var actuatorName = req.param('device');
-	app.locals.actuator = actuatorName;
+// 	var actuatorName = req.param('device');
+// 	app.locals.actuator = actuatorName;
 	var cityName = req.param('cityname');
 	
 	var query = "http://api.openweathermap.org/data/2.5/weather?";
@@ -123,5 +123,5 @@ app.get('/device/:device', getDeviceName);
 app.post('/device', setDeviceName);
 app.post('/device/cityname/', getCity);
 
-app.get('/device/:device/:cityname', getCity);
+app.get('/:device/:cityname', getCity);
 

@@ -4,6 +4,8 @@
   </div>
   <div class="row" style="height: 30%; text-align: center;">
 	<h1>{{actuator}}</h1>
+    <h3>Your City</h3>
+	
 	<h2>{{name}}</h2>
     <p>({{coord.lon}}, {{coord.lat}})</p>
 
@@ -16,8 +18,8 @@
       <!-- spacing column -->
     </div>
     <div class="col-md-4" style="text-align: center;">
-      <h3>Your City</h3>
-      <form method="post" action="/">
+      <h3>Choose another city</h3>
+      <form method="post" action="/device/cityname">
         <select name="cityname">
           <option value="New York">New York</option>
           <option value="London">London</option>
