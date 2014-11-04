@@ -10,12 +10,12 @@
       <!-- spacing column -->
     </div>
 <div class="col-md-4" style="text-align: center;">
-      <h3>Name your actuator</h3>
+      <h3>Name Your Actuator</h3>
 
       <form id="Acutator" method="post" action="/device">
 
-		<input type="text" value="44">
-        <p style="padding-top: 8px;"><button type="submit">Set</button></p>
+		<input type="text" name="Actuator" value="device">
+        <p style="padding-top: 8px;"><button type="submit">SET</button></p>
       </form>
     </div>
 
@@ -24,9 +24,7 @@
       <!-- spacing column -->
     </div>
     
-	{{#if Acutator}}
-	<h3>Actuator name <strong>{{Actuator}}</strong> is set!</h3>
-	{{/if}}
+
   </div>
   <div class="row" style="height: 40%;">
     <!-- spacing row -->

@@ -28,8 +28,8 @@ app.use(express.static(__dirname + '/public'));
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 //body parser
-app.use(bodyParser());
-
+// app.use(bodyParser());
+app.use(bodyParser.urlencoded())
 //server setup
 var server = app.listen(3300, function(){
   console.log('Listening on port %d', server.address().port);
@@ -39,21 +39,21 @@ var server = app.listen(3300, function(){
 function sendIndexPage(req, res){
 	res.render('layouts/top');
 }
-
 function getDeviceName(req, res){
 	var actuatorName = req.param('device');
 	console.log(actuatorName);
 	app.locals.actuator = actuatorName;
 
-	res.render('layouts/actuatorName', {actuator: actuatorName});
+	res.render('layouts/city', {actuator: actuatorName});
 
 }
+//DOESN'T WORK
 function setDeviceName(req, res){
-// 	var actuatorName = req.body.Acutator;
-	console.log(req);
+	var actuatorName = req.body.Actuator;
+	console.log(actuatorName);
 	app.locals.actuator = actuatorName;
 
-	res.render('layouts/actuatorName', {actuator: actuatorName});
+	res.render('layouts/actuatorName');
 
 }
 
@@ -121,5 +121,7 @@ function map_range(value, low1, high1, low2, high2) {
 app.get('/', sendIndexPage);
 app.get('/device/:device', getDeviceName);
 app.post('/device', setDeviceName);
+app.post('/device/cityname/', getCity);
+
 app.get('/device/:device/:cityname', getCity);
 
