@@ -3,30 +3,35 @@
     <!-- spacing row -->
   </div>
   <div class="row" style="height: 30%; text-align: center;">
+    
+	<h1>{{actuator}}</h1>
+
+	<h3>Set your City</h3>
+
+    <p>({{coord.lon}}, {{coord.lat}})</p>
+
+    <h4>{{main.temp}}℃</h4>
+
 
   </div>
   <div class="row" style="height: 10%;">
     <div class="col-md-4">
       <!-- spacing column -->
     </div>
-<div class="col-md-4" style="text-align: center;">
-      <h3>Name your actuator</h3>
+    <div class="col-md-4" style="text-align: center;">
+      <form method="post" action="/device/">
 
-      <form id="Acutator" method="post" action="/device">
-
-		<input type="text" value="44">
-        <p style="padding-top: 8px;"><button type="submit">Set</button></p>
+        <select name="cityname">
+          <option value="New York">New York</option>
+          <option value="London">London</option>
+          <option value="Tokyo">Tokyo</option>
+        </select>
+        <p style="padding-top: 8px;"><button type="submit">Actuate</button></p>
       </form>
-    </div>
-
     </div>
     <div class="col-md-4">
       <!-- spacing column -->
     </div>
-    
-	{{#if Acutator}}
-	<h3>Actuator name <strong>{{Actuator}}</strong> is set!</h3>
-	{{/if}}
   </div>
   <div class="row" style="height: 40%;">
     <!-- spacing row -->

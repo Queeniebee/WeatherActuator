@@ -9,21 +9,12 @@ var express = require('express');
 var exphbs  = require('express3-handlebars');
 var bodyParser = require('body-parser');
 var request = require('request');
-var mongo = require('mongodb');
-
-var firmata = require('firmata');
+// var firmata = require('firmata');
 var serialPort = require('serialport');
+var arduino = require('serial');
 
 var ledPin = 13;
 var tempValue = 0;
-
-var Server = mongo.Server;
-var Db = mongo.Db;
-var BSON = mongo.BSONPure;
-
-var server = new Server('localhost', 3300, {auto_reconnect: true});
-db = new Db('waDB', server, {safe: true});
-
 
 var port = "/dev/tty.usbmodemfd121";
 var board = new firmata.Board(port, function(err){
@@ -50,92 +41,23 @@ var server = app.listen(3300, function(){
   console.log('Listening on port %d', server.address().port);
 });
 
-db.open(function(err, db) {
-    if(!err) {
-        console.log("Connected to 'waDB' database");
-        db.collection('devices', {safe:true}, function(err, collection) {
-            if (err) {
-                console.log("The 'wines' collection doesn't exist. Creating it with sample data...");
-                populateDB();
-            }
-        });
-    }
-});
-
-exports.findById = function(req, res) {
-    var id = req.params.id;
-    console.log('Retrieving wine: ' + id);
-    db.collection('devices', function(err, collection) {
-        collection.findOne({'_id':new BSON.ObjectID(id)}, function(err, item) {
-            res.send(item);
-        });
-    });
-};
-
-exports.findAll = function(req, res) {
-    db.collection('devices', function(err, collection) {
-        collection.find().toArray(function(err, items) {
-            res.send(items);
-        });
-    });
-};
-
-exports.addDevice = function(req, res) {
-    var device = req.body;
-    console.log('Adding device: ' + JSON.stringify(wine));
-    db.collection('devices', function(err, collection) {
-        collection.insert(device, {safe:true}, function(err, result) {
-            if (err) {
-                res.send({'error':'An error has occurred'});
-            } else {
-                console.log('Success: ' + JSON.stringify(result[0]));
-                res.send(result[0]);
-            }
-        });
-    });
-}
-
-exports.updateDeviceLocation = function(req, res) {
-    var id = req.params.id;
-    var device = req.body;
-    delete device._id;
-    console.log('Updating wine: ' + id);
-    console.log(JSON.stringify(device));
-    db.collection('devices', function(err, collection) {
-        collection.update({'_id':new BSON.ObjectID(id)}, device, {safe:true}, function(err, result) {
-            if (err) {
-                console.log('Error updating wine: ' + err);
-                res.send({'error':'An error has occurred'});
-            } else {
-                console.log('' + result + ' document(s) updated');
-                res.send(device);
-            }
-        });
-    });
-}
-
-exports.deleteDevice = function(req, res) {
-    var id = req.params.name;
-    console.log('Deleting device: ' + id);
-    db.collection('devices', function(err, collection) {
-        collection.remove({'_id':new BSON.ObjectID(id)}, {safe:true}, function(err, result) {
-            if (err) {
-                res.send({'error':'An error has occurred - ' + err});
-            } else {
-                console.log('' + result + ' document(s) deleted');
-                res.send(req.body);
-            }
-        });
-    });
-}
 //serve up index page from views/layouts
 function sendIndexPage(req, res){
 	res.render('layouts/top');
 }
 
-function setDeviceName(req, res){
+function getDeviceName(req, res){
 	var actuatorName = req.param('device');
 	console.log(actuatorName);
+	app.locals.actuator = actuatorName;
+
+	res.render('layouts/actuatorName', {actuator: actuatorName});
+
+}
+function setDeviceName(req, res){
+// 	var actuatorName = req.body.Acutator;
+	console.log(req);
+	app.locals.actuator = actuatorName;
 
 	res.render('layouts/actuatorName', {actuator: actuatorName});
 
@@ -146,7 +68,6 @@ function setDeviceName(req, res){
 function getCity(req, res, body){
 	var actuatorName = req.param('device');
 	app.locals.actuator = actuatorName;
-
 	var cityName = req.param('cityname');
 	
 	var query = "http://api.openweathermap.org/data/2.5/weather?";
@@ -197,10 +118,7 @@ function getCity(req, res, body){
 		request.get(query, callback);
 } 
 app.get('/', sendIndexPage);
-app.get('/:device', setDeviceName);
-app.get('/:device/:cityname', getCity);
-
-
-// app.get('/actuator/displaying', getDisplay);
-
+app.get('/device/:device', getDeviceName);
+app.post('/device', setDeviceName);
+app.get('/device/:device/:cityname', getCity);
 
