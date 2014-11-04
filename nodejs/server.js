@@ -8,6 +8,7 @@
 var express = require('express');
 var exphbs  = require('express3-handlebars');
 var bodyParser = require('body-parser');
+var request = require('request');
 
 var firmata = require('firmata');
 var serialPort = require('serialport');
@@ -16,6 +17,8 @@ var ledPin = 13;
 var tempValue = 0;
 
 var location = "";
+var query = "http://api.openweathermap.org/data/2.5/weather?";
+
 var port = "/dev/tty.usbmodemfd121";
 var board = new firmata.Board(port, function(err){
     if (err) {
@@ -48,59 +51,62 @@ function sendIndexPage(req, res){
 
 //function that sets the city for the Actuator
 //ALMOST WORKS
-function getCity(req, res){
+function getCity(req, res, body){
 	var actuatorName = req.param('name');
 	var cityName = req.param('cityname');
 	//checking if variable is being set
 	console.log(cityName);
 	console.log(actuatorName);
-
+	
 	getCityTemp(cityName);
-//function that gets the temp of the specified city
-function getCityTemp(err, cityName){
 
-    if (!err) {
+	//function that gets the temp of the specified city
+	function getCityTemp(error, response, body, cityName){
+// 			var query = "http://api.openweathermap.org/data/2.5/weather?";
+  			var key = "";
+  			var options = [];
+  			options["APPID"] = "d9a5fc0bed270bb5e6e3c6ae3d0b2fe7";
+  			options["q"] = cityName; //cityName from above
 
-	var query = "http://api.openweathermap.org/data/2.5/weather?";
-  	var key = "";
-  	var options = [];
-  	options["APPID"] = "d9a5fc0bed270bb5e6e3c6ae3d0b2fe7";
-  	options["q"] = cityName; //cityName from above
+			for (key in options){
+				var str = key + '=' + options[key];
+				query = query + str + '&';
+			}
+	  		//remove the last character '&' from the query
+	  		query = query.slice(0, -1);
+			if(!error && response.statusCode===200){
 
-	for (key in options){
-		var str = key + '=' + options[key];
-		query = query + str + '&';
+         	var data = JSON.parse(body);
+
+        	console.log("Response from API:");
+        	console.log(data);
+
+        	//convert the temperature from Kelvin to Celsius
+        	data.main.temp = data.main.temp - 273.15;
+        	data.main.temp = data.main.temp.toFixed(1);
+        	console.log(data.main.temp);
+
+			tempValue = data.main.temp;
+
+			if(tempValue >= 10){
+
+				board.digitalWrite(ledPin, board.HIGH);
+
+			} else{
+			board.digitalWrite(ledPin, board.LOW);
+
+			}
+
+		res.render('layouts/city', data);
+		}
 	}
-	  //remove the last character '&' from the query
-	  query = query.slice(0, -1);
-        var data = JSON.parse(res);
-        console.log("Response from API:");
-        console.log(data);
 
-        //convert the temperature from Kelvin to Celsius
-        data.main.temp = data.main.temp - 273.15;
-        data.main.temp = data.main.temp.toFixed(1);
-        console.log(data.main.temp);
-
-		tempValue = data.main.temp;
-
-		if(tempValue >= 10){
-
-			board.digitalWrite(ledPin, board.HIGH);
-
-		} else{
-		board.digitalWrite(ledPin, board.LOW);
-
-		}
-// 	res.render('layouts/city');
-	res.render('actuator.html');
-		}
-	} 
+		request.get(query, getCityTemp(cityName));
+// 		res.status(200).send(query);
 } 
-
+app.set('name', 'Weather Actuator');
 app.get('/', sendIndexPage);
 //this GETs the city and sets it on the physical device
-// app.get('/actuator/:name	', getActuatorName);
 app.get('/:name/:cityname/', getCity);
 // app.get('/actuator/displaying', getDisplay);
 
