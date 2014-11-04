@@ -8,12 +8,13 @@
 var express = require('express');
 var exphbs  = require('express3-handlebars');
 var bodyParser = require('body-parser');
+
 var firmata = require('firmata');
 var serialPort = require('serialport');
 
 var ledPin = 13;
 var tempValue = 0;
-// var cityname = "";
+
 var location = "";
 var port = "/dev/tty.usbmodemfd121";
 var board = new firmata.Board(port, function(err){
@@ -41,7 +42,6 @@ var server = app.listen(3300, function(){
 });
 
 //serve up index page from views/layouts
-//WORKS
 function sendIndexPage(req, res){
 	res.render('layouts/top');
 }
@@ -49,20 +49,18 @@ function sendIndexPage(req, res){
 //function that sets the city for the Actuator
 //ALMOST WORKS
 function getCity(req, res){
-	
-// 	res.render('layouts/city');
+	var actuatorName = req.param('name');
 	var cityName = req.param('cityname');
+	//checking if variable is being set
 	console.log(cityName);
+	console.log(actuatorName);
+
 	getCityTemp(cityName);
 //function that gets the temp of the specified city
-// function getCityTemp(err, req, res){
 function getCityTemp(err, cityName){
 
-//     if (!err && res.statusCode === 200) {
     if (!err) {
-// 	cityname = req.body.cityname;
-// 	cityname = req.params[1];
-// 	cityname = data.cityname;
+
 	var query = "http://api.openweathermap.org/data/2.5/weather?";
   	var key = "";
   	var options = [];
@@ -78,7 +76,7 @@ function getCityTemp(err, cityName){
         var data = JSON.parse(res);
         console.log("Response from API:");
         console.log(data);
-// 		cityname = data.name;
+
         //convert the temperature from Kelvin to Celsius
         data.main.temp = data.main.temp - 273.15;
         data.main.temp = data.main.temp.toFixed(1);
@@ -94,16 +92,19 @@ function getCityTemp(err, cityName){
 		board.digitalWrite(ledPin, board.LOW);
 
 		}
-	res.render('layouts/city');
-//   request.get(query, getCityTemp);
-}
-} //end getCityTemp function
-} //ends getCity function
+// 	res.render('layouts/city');
+	res.render('actuator.html');
+		}
+	} 
+} 
 
 app.get('/', sendIndexPage);
 //this GETs the city and sets it on the physical device
-app.get('/ask/:cityname/', getCity);
-
+// app.get('/actuator/:name	', getActuatorName);
+app.get('/:name/:cityname/', getCity);
+// app.get('/actuator/displaying', getDisplay);
 
 //this GETs the actual temp from the OpenWeather API
 // app.get('/ask', getCityTemp);
+
+// '/:name/:cityname'

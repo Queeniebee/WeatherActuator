@@ -12,8 +12,8 @@
       <!-- spacing column -->
     </div>
     <div class="col-md-4" style="text-align: center;">
-      <h3>Select a city</h3>
-      <form method="post" action="/">
+      <h3>Set your city</h3>
+      <form method="post" action="/actuatorName/">
         <select name="cityname">
           <option value="New York">New York</option>
           <option value="London">London</option>
@@ -25,6 +25,17 @@
     <div class="col-md-4">
       <!-- spacing column -->
     </div>
+    <div class="col-md-4" style="text-align: center;">
+      <h3>Name your actuator</h3>
+<!-- 
+      <form method="post" action="/actuatorName/">
+ -->
+      <form>
+		<input type="text" name="Actuator Name">
+        <p style="padding-top: 8px;"><button type="submit">Set</button></p>
+      </form>
+    </div>
+
   </div>
   <div class="row" style="height: 40%;">
     <!-- spacing row -->
