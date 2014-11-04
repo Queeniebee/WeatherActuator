@@ -9,23 +9,17 @@ var express = require('express');
 var exphbs  = require('express3-handlebars');
 var bodyParser = require('body-parser');
 var request = require('request');
-// var firmata = require('firmata');
-var serialPort = require('serialport');
-var arduino = require('serial');
+var serialport = require('serialport');
+
+var SerialPort = serialport.SerialPort;
+
+var myPort = new SerialPort("/dev/tty.usbmodemfd121", {
+	baudrate: 9600,
+	parser: serialport.parsers.readline('\r\n')
+});
 
 var ledPin = 13;
 var tempValue = 0;
-
-var port = "/dev/tty.usbmodemfd121";
-var board = new firmata.Board(port, function(err){
-    if (err) {
-        console.log(err);
-        return;
-    }
-    console.log('connected');
-	board.pinMode(ledPin, board.MODES.OUTPUT);
-
-});
 
 var app = express();
 //use static local files
@@ -99,24 +93,31 @@ function getCity(req, res, body){
         	data.main.temp = data.main.temp - 273.15;
         	data.main.temp = data.main.temp.toFixed(1);
         	console.log(data.main.temp);
-			tempValue = data.main.temp;
+			
+		tempValue = data.main.temp;
 			console.log(tempValue);
-/*
-			if(tempValue >= 10){
 
-				board.digitalWrite(ledPin, board.HIGH);
+		tempValue = map_range(tempValue, -10, 30, 0, 359);
+        tempValue = Math.round(tempValue);
+        if(tempValue > 359) {tempValue = 359;}
+        if(tempValue < 0) {tempValue = 0;}
+        tempValue = tempValue.toString();
+        console.log(tempValue);
+        // send it out the serial port:
+        myPort.write(tempValue);
 
-			} else{
-			board.digitalWrite(ledPin, board.LOW);
 
-			}
-*/
 		res.render('layouts/city', data);
 		}
 	}
 
 		request.get(query, callback);
 } 
+
+function map_range(value, low1, high1, low2, high2) {
+    return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
+}
+
 app.get('/', sendIndexPage);
 app.get('/device/:device', getDeviceName);
 app.post('/device', setDeviceName);
